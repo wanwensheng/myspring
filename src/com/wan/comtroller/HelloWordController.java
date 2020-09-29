@@ -27,6 +27,7 @@ public class HelloWordController {
     public  void addHello(HttpServletRequest req , HttpServletResponse resp ,String name) throws IOException {
         System.out.println("执行了addHello方法，nane="+name);
         String hello = helloWorldService.hello(name);
+        System.out.println("线程ID:"+Thread.currentThread().getId());
         resp.getWriter().write("Hello,My name " +name+hello);
     }
 }
