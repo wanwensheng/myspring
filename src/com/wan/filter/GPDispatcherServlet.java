@@ -45,16 +45,29 @@ public class GPDispatcherServlet extends HttpServlet {
         String requestURI = req.getRequestURI();
         Method method = handlerMapping.get(requestURI);
         if(method==null){
-            try {
-                throw  new Exception("404，没有找到对Action");
-            } catch (Exception e) {
-               e.printStackTrace();
-            }
-
+            return;
         }
         try {
+            Map<String,String[]> params = req.getParameterMap();
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            Object[] prarmterArray = new Object[parameterTypes.length];
+            for (int i = 0; i < parameterTypes.length; i++) {
+                Class<?> parameterType = parameterTypes[i];
+                if(parameterType==HttpServletRequest.class){
+                    prarmterArray[i]=req;
+                }else if(parameterType==HttpServletResponse.class){
+                    prarmterArray[i]=resp;
+                }else if (parameterType == String.class){
+                    String value = Arrays.toString(params.get("name"))
+                            .replaceAll("\\[|\\]","")
+                            .replaceAll("\\s+",",");
+                    prarmterArray[i]=value;
+                }
+
+            }
+
             String beanName = toLowerCaseFrist(method.getDeclaringClass().getSimpleName());
-            method.invoke(beanMap.get(beanName),new Object[]{req,resp,req.getParameterValues("name")[0]});
+            method.invoke(beanMap.get(beanName),prarmterArray);
         } catch (Exception e) {
             e.printStackTrace();
         }
